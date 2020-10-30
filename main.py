@@ -43,7 +43,7 @@ class GameState:
       while(i>=0):
         i -= 1
         if(i>=0 and j < xlim and i<ylim and j >= 0  and self._board[i][j] == -1):
-          print("up",i,j)
+          # print("up",i,j)
           legalMoves.append((i,j))
         else:
           break
@@ -126,17 +126,6 @@ class GameState:
     return legalMoves
 
   def forecast_move(self, move):
-      """ Return a new board object with the specified move
-      applied to the current game state.
-      
-      Parameters
-      ----------
-      move: tuple
-          The target position for the active player's next move
-          (e.g., (0, 0) if the active player will move to the
-          top-left corner of the board)
-      """
-      # TODO: implement this function!
       if move not in self.get_legal_moves():
         raise RuntimeError("Attempted forecast of illegal move")
       newBoard = deepcopy(self)
@@ -151,11 +140,72 @@ class GameState:
             if self._board[x][y] == -1]
 
 
+def terminal_test(gameState):
+  #get the legal moves if its empty then Return true else  False
+  moves = gameState.get_legal_moves()
+  if(len(moves) == 0):
+    return True
+  else:
+    return False
+
+def min_value(gameState):
+  """ Return the value for a win (+1) if the game is over,
+  otherwise return the minimum value over all legal child
+  nodes.
+  """
+  if(terminal_test(gameState)):
+    return 1
+  moves = gameState.get_legal_moves()
+  mi = 99999
+  for i in moves:
+    temp = gameState.forecast_move(i)
+    v = min(mi,min_value(temp))
+  return v
+def max_value(gameState):
+  """ Return the value for a loss (-1) if the game is over,
+  otherwise return the maximum value over all legal child
+  nodes.
+  """
+  if(terminal_test(gameState)):
+    return -1
+  moves = gameState.get_legal_moves()
+  mi = -99999
+  for i in moves:
+    temp = gameState.forecast_move(i)
+    v = max(mi,min_value(temp))
+  return v
+
+def minimax_decision(gameState):
+  """ Return the move along a branch of the game tree that
+  has the best possible value.  A move is a pair of coordinates
+  in (column, row) order corresponding to a legal move for
+  the searching player.
+  
+  You can ignore the special case of calling this function
+  from a terminal state.
+  """
+  best_Score = -999999
+  best_Move = None
+  for i in gameState.get_legal_moves():
+    temp = min_value(gameState.forecast_move(i))
+    if(temp >best_Score):
+      best_Score = temp
+      best_Move = i
+
+  return best_Move
+  return max(gameState.get_legal_moves(),
+          key = lambda m: min_value(gameState.forecast_move(m)))
+
+
+
+
+
+
 if __name__ == "__main__":
     # This code is only executed if "gameagent.py" is the run
     # as a script (i.e., it is not run if "gameagent.py" is
     # imported as a module)
     emptyState = GameState()
-    emptyState.forecast_move((0,1))
+    print(minimax_decision(emptyState))
     # create an instance of the object
     
